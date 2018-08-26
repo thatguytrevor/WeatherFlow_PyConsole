@@ -1094,21 +1094,6 @@ WeatherFlowPyConsoleScreen:
 			size: self.parent.size
 			pos: self.parent.pos	
 	Button:
-		text: "Backlight"
-		size_hint: (None,None)
-		size: (90,30)
-		pos: (222,0)	
-		on_press: root.Backlight_Demand(self)
-		on_release: root.Button_Release(self)		
-		Image:
-			source: "Buttons/Backlight.png"  
-			id: Backlight
-			size_hint: (None,None)
-			keep_ratio: 0
-			allow_stretch: 1
-			size: self.parent.size
-			pos: self.parent.pos
-	Button:
 		text: "Credits"
 		size_hint: (None,None)
 		size: (81,30)

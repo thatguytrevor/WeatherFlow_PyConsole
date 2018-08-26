@@ -78,7 +78,6 @@ from kivy.clock import Clock
 from twisted.internet import reactor,ssl
 from datetime import datetime,date,time,timedelta
 from geopy import distance as geopy
-import rpi_backlight as bl
 import time as UNIX
 import numpy as np
 import Sager
@@ -249,7 +248,6 @@ class WeatherFlowPyConsole(App):
 		Clock.schedule_once(lambda dt: self.Websocket_Connect())
 		Clock.schedule_once(self.Calc_SagerForecast)
 		Clock.schedule_interval(self.Update_Methods,1.0)
-		Clock.schedule_interval(self.Backlight_Schedule,1.0)
 		Clock.schedule_interval(self.Check_SkyAirStatus,10.0)
 	
 	# POINT "WeatherFlowPyConsole" APP CLASS TO ASSOCIATED .kv FILE
@@ -440,47 +438,38 @@ class WeatherFlowPyConsole(App):
 			return
 			
 		# Extract required meteorological fields
-		Temp = self.Air['Obs'][2]
-		Humidity = self.Air['Obs'][3]
-		Wind = self.Sky['Obs'][5] * 2.23694                      # Wind in mph
-
-		# Calculate 'Feels Like' temperature 
-		if Temp > 14:
+		TempC = self.Air['Obs'][2]						# Temperature in C
+		TempF = self.Air['Obs'][2] * 9/5 + 32			# Temperature in F
+		RH = self.Air['Obs'][3]							# Relative humidity in %
+		WindMPH = self.Sky['Obs'][5] * 2.23694          # Wind speed in mph
+		WindKPH = self.Sky['Obs'][5] * 3.6				# Wind speed in km/h 
+						
+		# If temperature is less than 10 degrees celcius and wind speed is 
+		# higher than 5 mph, calculate wind chill using the Joint Action Group 
+		# for Temperature Indices formula
+		if TempC <= 10 and WindMPH > 5:
 		
-			# Calculate Australian Apparent Temperature
-			e = Humidity/100*6.105*math.exp(17.27*Temp/(237.7+Temp))
-			AT = Temp+0.33*e-0.70*(Wind*0.44704)-4.00
+			# Calculate wind chill
+			WC = (13.12 + 0.6215*TempC - 11.37*(WindKPH)**0.16 
+						+ 0.3965*TempC*(WindKPH)**0.16)
+						
+			# Define Kivy Label binds			
+			self.Air['FeelsLike'] = "{:2.1f}".format(WC)
 			
-			# Set 'Feels Like' temperature to observed 
-			# temperature if AT is less than observed
-			if AT < Temp:
-				self.Air['FeelsLike'] = "{:2.1f}".format(Temp)
-			else:
-				self.Air['FeelsLike'] = "{:2.1f}".format(AT)
-		elif Temp <= 14:
+		# If temperature is greater than 26.67 degress celcius (80 F), calculate
+		# the Heat Index
+		elif TempF >= 80:
+		
+			# Calculate Heat Index
+			HI = (-42.379 + (2.04901523*TempF) + (10.1433127*RH) - (0.22475541*TempF*RH) - (6.83783e-3*TempF**2) - (5.481717e-2*RH**2) + (1.22874e-3*TempF**2*RH) + (8.5282e-4*TempF*RH**2) - (1.99e-6*TempF**2*RH**2))
+			HI = (HI-32) * 5/9
 			
-			# Calculate wind chill using the Joint Action Group for 
-			# Temperature Indices formula
-			WC = (13.12 + 0.6215*Temp - 11.37*(Wind*1.60934)**0.16 
-			            + 0.3965*Temp*(Wind*1.60934)**0.16)
+			# Define Kivy Label binds			
+			self.Air['FeelsLike'] = "{:2.1f}".format(HI)
 
-			# If observed temperature is less than 10 C and 
-			# windspeed higher than 3 mph, set 'Feels Like' 
-			# temperature to calculated wind chill.
-			if Temp <= 10 and Wind > 3:
-				self.Air['FeelsLike'] = "{:2.1f}".format(WC)
-				
-			# If temperature is greater than 10 C and windspeed
-			# higher than 3 mph, use linear roll off from wind 
-			# chill to set 'Feels Like' temperature
-			elif Temp > 10 and Wind > 3:
-				WC = Temp-(Temp-WC)*(14-Temp)/4
-				self.Air['FeelsLike'] = "{:2.1f}".format(WC)
-				
-			# Else if windspeed is less than 3 mph, set
-			# 'Feels Like' temperature to observed
-			elif Wind <= 3:
-				self.Air['FeelsLike'] = "{:2.1f}".format(Temp)
+		# Else set 'Feels Like' temperature to observed temperature
+		else: 
+			self.Air['FeelsLike'] = "{:2.1f}".format(TempC)
 						
 	# CALCULATE SEA LEVEL PRESSURE FROM AMBIENT PRESSURE AND 
 	# STATION ELEVATION
@@ -1086,11 +1075,11 @@ class WeatherFlowPyConsole(App):
 		# Define Kivy label binds for next new/full moon in 
 		# station time zone
 		if FullMoon.date() == Now.date():
-			self.MoonData['FullMoon'] = 'Today'
+			self.MoonData['FullMoon'] = '[color=ff8837ff]Today[/color]'   
 		else:
 			self.MoonData['FullMoon'] = FullMoon.astimezone(Tz).strftime('%b %d') 
 		if NewMoon.date() == Now.date():
-			self.MoonData['NewMoon'] = 'Today'
+			self.MoonData['NewMoon'] = '[color=ff8837ff]Today[/color]'
 		else:
 			self.MoonData['NewMoon'] = NewMoon.astimezone(Tz).strftime('%b %d') 
 		
@@ -1213,9 +1202,9 @@ class WeatherFlowPyConsole(App):
 			self.MoonData['Icon'] = 'Waning_' + "{:.0f}".format(Moon.phase)
 
 		# Define Moon phase text
-		if self.MoonData['NewMoon'] == 'Today':
+		if self.MoonData['NewMoon'] == '[color=ff8837ff]Today[/color]':
 			self.MoonData['Phase'] = 'New Moon'
-		elif self.MoonData['FullMoon'] == 'Today':
+		elif self.MoonData['FullMoon'] == '[color=ff8837ff]Today[/color]':
 			self.MoonData['Phase'] = 'Full Moon'	
 		elif FullMoon < NewMoon and Moon.phase < 49:
 			self.MoonData['Phase'] = 'Waxing crescent'
@@ -1514,29 +1503,6 @@ class WeatherFlowPyConsole(App):
 			else:
 				self.Sky['StatusIcon'] = "OK"
 	
-	# DEFINE BACKLIGHT SCHEDULE BASED ON TIME OF DAY
-	# -----------------------------------------------------------
-	def Backlight_Schedule(self,dt):
-	
-		# Calculate current time in station timezone
-		Tz = self.System['tz']
-		Now = datetime.now(pytz.utc).astimezone(Tz)	
-	
-		# Calculate number of seconds since backlight requested
-		if not 'BacklightTime' in self.System:
-			BacklighRequest = math.inf
-		else:
-			BacklighRequest = (Now - self.System['BacklightTime']).total_seconds()
-		
-		# Set backlight schedule based on time of day unless over 
-		# ridden by manaul backlight request
-		if BacklighRequest < 300:
-			return
-		elif Now.hour >= 22 or Now.hour < 7 or 9 <= Now.hour < 17:
-			bl.set_brightness(15)   
-		else:
-			bl.set_brightness(50)
-			
 	# UPDATE "WeatherFlowPyConsole" METHODS AT REQUIRED INTERVALS
 	# -----------------------------------------------------------
 	def Update_Methods(self,dt):
@@ -1608,18 +1574,6 @@ class CurrentConditions(Screen):
 		Tz = App.get_running_app().System['tz']
 		self.Screen['Clock'] = datetime.now(Tz).strftime("%a, %d %b %Y\n%H:%M:%S")
 		
-	# SET BACKLIGHT ON DEMAND
-	# -----------------------------------------------------------
-	def Backlight_Demand(self,instance):
-	
-		# Highlight Backlight button press
-		self.Button_Press(instance.text)
-		
-		# Set backlight level on demand
-		bl.set_brightness(100)
-		Tz = App.get_running_app().System['tz']
-		App.get_running_app().System['BacklightTime'] = datetime.now(Tz)
-					
 	# ANIMATE RAIN RATE ICON
 	# -----------------------------------------------------------
 	def RainRate_Animation(self,dt):
@@ -1693,8 +1647,6 @@ class CurrentConditions(Screen):
 			self.ids.Forecast.source = "Buttons/Forecast_Pressed.png"
 		elif ID == 'SunMoon':
 			self.ids.SunMoon.source = "Buttons/SunMoon_Pressed.png"
-		elif ID == 'Backlight':
-			self.ids.Backlight.source = "Buttons/Backlight_Pressed.png"
 		elif ID == 'Credits':
 			self.ids.Credits.source = "Buttons/Credits_Pressed.png"
 		
@@ -1705,8 +1657,6 @@ class CurrentConditions(Screen):
 			self.ids.Forecast.source = "Buttons/Forecast.png"
 		elif instance.text == 'SunMoon':
 			self.ids.SunMoon.source = "Buttons/SunMoon.png"
-		elif instance.text == 'Backlight':
-			self.ids.Backlight.source = "Buttons/Backlight.png"
 		elif instance.text == 'Credits':
 			self.ids.Credits.source = "Buttons/Credits.png"
 	
