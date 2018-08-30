@@ -25,6 +25,8 @@ from twisted.internet.protocol import ReconnectingClientFactory
 from autobahn.twisted.websocket import WebSocketClientProtocol, \
                                        WebSocketClientFactory
 
+fahrenheit_multiplier = 9/5 + 32
+
 # Specifies behaviour of Websocket Client									   
 class WeatherFlowClientProtocol(WebSocketClientProtocol):
 
@@ -389,7 +391,7 @@ class WeatherFlowPyConsole(App):
 			
 			# Define and format Kivy label binds
 			self.Air['Time'] = datetime.fromtimestamp(Time,self.System['tz']).strftime('%H:%M:%S')
-			self.Air['Temp'] = "{:2.1f}".format(Temp)
+			self.Air['Temp'] = "{:2.1f}".format(Temp * 9/5 + 32)
 			self.Air['Humidity'] = "{:2.0f}".format(Humidity)
 			self.Air['Pres'] = "{:4.1f}".format(Pres)
 			self.Air['PresTrnd'] = Msg['summary']['pressure_trend']
@@ -424,7 +426,7 @@ class WeatherFlowPyConsole(App):
 			B = 243.04
 			N = B*(math.log(Humidity/100.0) + (A*Temp)/(B+Temp))
 			D = A-math.log(Humidity/100.0) - A*Temp/(B+Temp)
-			self.Air['DewPoint'] = "{:2.1f}".format(N/D);
+			self.Air['DewPoint'] = "{:2.1f}".format((N/D) * 9/5 + 32);
 		else:
 			self.Air['DewPoint'] = '--'
 			
@@ -454,7 +456,7 @@ class WeatherFlowPyConsole(App):
 						+ 0.3965*TempC*(WindKPH)**0.16)
 						
 			# Define Kivy Label binds			
-			self.Air['FeelsLike'] = "{:2.1f}".format(WC)
+			self.Air['FeelsLike'] = "{:2.1f}".format(WC * 9/5 + 32)
 			
 		# If temperature is greater than 26.67 degress celcius (80 F), calculate
 		# the Heat Index
@@ -465,11 +467,11 @@ class WeatherFlowPyConsole(App):
 			HI = (HI-32) * 5/9
 			
 			# Define Kivy Label binds			
-			self.Air['FeelsLike'] = "{:2.1f}".format(HI)
+			self.Air['FeelsLike'] = "{:2.1f}".format(HI * 9/5 + 32)
 
 		# Else set 'Feels Like' temperature to observed temperature
 		else: 
-			self.Air['FeelsLike'] = "{:2.1f}".format(TempC)
+			self.Air['FeelsLike'] = "{:2.1f}".format(TempC * 9/5 + 32)
 						
 	# CALCULATE SEA LEVEL PRESSURE FROM AMBIENT PRESSURE AND 
 	# STATION ELEVATION
@@ -669,8 +671,8 @@ class WeatherFlowPyConsole(App):
 			MinInd = Temp.index(min(Temp))
 			
 			# Define Kivy label binds
-			self.Air['MaxTemp'] = "{:2.1f}".format(Temp[MaxInd])
-			self.Air['MinTemp'] = "{:2.1f}".format(Temp[MinInd])
+			self.Air['MaxTemp'] = "{:2.1f}".format(Temp[MaxInd] * 9/5 + 32)
+			self.Air['MinTemp'] = "{:2.1f}".format(Temp[MinInd] * 9/5 + 32)
 			self.Air['MaxTempTime'] = datetime.fromtimestamp(Time[MaxInd],self.System['tz']).strftime('%H:%M')
 			self.Air['MinTempTime'] = datetime.fromtimestamp(Time[MinInd],self.System['tz']).strftime('%H:%M')
 			
@@ -687,8 +689,8 @@ class WeatherFlowPyConsole(App):
 		# At midnight, reset maximum and minimum temperature
 		# and pressure recorded by Air module
 		if self.Air['MetDay'] < Now.date():
-			self.Air['MaxTemp'] = "{:2.1f}".format(Temp)
-			self.Air['MinTemp'] = "{:2.1f}".format(Temp)
+			self.Air['MaxTemp'] = "{:2.1f}".format(Temp * 9/5 + 32)
+			self.Air['MinTemp'] = "{:2.1f}".format(Temp * 9/5 + 32)
 			self.Air['MaxTempTime'] = datetime.fromtimestamp(Time,self.System['tz']).strftime('%H:%M')
 			self.Air['MinTempTime'] = datetime.fromtimestamp(Time,self.System['tz']).strftime('%H:%M')
 			self.Air['MaxPres'] = "{:4.1f}".format(Pres)
@@ -698,13 +700,13 @@ class WeatherFlowPyConsole(App):
 		# Current temperature is greater than maximum recorded
 		# temperature. Update maximum temperature and time
 		if Temp > float(self.Air['MaxTemp']):
-			self.Air['MaxTemp'] = "{:2.1f}".format(Temp)
+			self.Air['MaxTemp'] = "{:2.1f}".format(Temp * 9/5 + 32)
 			self.Air['MaxTempTime'] = datetime.fromtimestamp(Time,self.System['tz']).strftime('%H:%M')
 			
 		# Current temperature is less than minimum recorded
 		# temperature. Update minimum temperature and time	
 		if Temp < float(self.Air['MinTemp']):
-			self.Air['MinTemp'] = "{:2.1f}".format(Temp)
+			self.Air['MinTemp'] = "{:2.1f}".format(Temp * 9/5 + 32)
 			self.Air['MinTempTime'] = datetime.fromtimestamp(Time,self.System['tz']).strftime('%H:%M')
 			
 		# Current pressure is greater than maximum recorded
@@ -1290,7 +1292,7 @@ class WeatherFlowPyConsole(App):
 		self.MetData['Time'] = datetime.now(self.System['tz'])
 		self.MetData['Issued'] = Issued
 		self.MetData['Valid'] = "{:02.0f}".format(Valid) + ':00'	
-		self.MetData['Temp'] = "{:.1f}".format(float(MetData['T']))
+		self.MetData['Temp'] = "{:.1f}".format(float(MetData['T']) * 9/5 + 32)
 		self.MetData['WindDir'] = MetData['D']
 		self.MetData['WindSpd'] = MetData['S']
 		self.MetData['Weather'] = MetData['W']
@@ -1343,7 +1345,7 @@ class WeatherFlowPyConsole(App):
 		self.MetData['Time'] = datetime.now(self.System['tz'])
 		self.MetData['Issued'] = datetime.strftime(Issued,'%H:%M')
 		self.MetData['Valid'] = datetime.strftime(Valid,'%H:%M')
-		self.MetData['Temp'] = "{:.1f}".format(Temp)
+		self.MetData['Temp'] = "{:.1f}".format(Temp * 9/5 + 32)
 		self.MetData['WindDir'] = self.WindBearingToCompassDirec(WindDir)[0]
 		self.MetData['WindSpd'] = "{:.0f}".format(WindSpd)
 		self.MetData['Precip'] = "{:.0f}".format(Precip)

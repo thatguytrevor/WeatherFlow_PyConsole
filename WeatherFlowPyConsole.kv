@@ -74,7 +74,7 @@ WeatherFlowPyConsoleScreen:
 		
 		## FORECAST TEMPERATURE
 		Label:
-			text:  app.MetData['Temp'] + " [sup]o[/sup]C"
+			text:  app.MetData['Temp'] + " [sup]o[/sup]F"
 			font_name: "Fonts/SystemSanFranciscoDisplayThin.ttf"
 			font_size: "30sp"
 			text_size: self.size
@@ -173,7 +173,7 @@ WeatherFlowPyConsoleScreen:
 	## ----------------------------------------------------------	
 	## Indoor temperature
 	Label:
-		text: app.Breathe['Temp'] + " [sup]o[/sup]C"
+		text: app.Breathe['Temp'] + " [sup]o[/sup]F"
 		font_name: "Fonts/SystemSanFranciscoDisplayThin.ttf"
 		font_size: "30sp"
 		text_size: self.size
@@ -187,7 +187,7 @@ WeatherFlowPyConsoleScreen:
 		
 	## Outdoor Temperature
 	Label:
-		text: app.Air['Temp'] + " [sup]o[/sup]C"
+		text: app.Air['Temp'] + " [sup]o[/sup]F"
 		font_name: "Fonts/SystemSanFranciscoDisplayThin.ttf"
 		font_size: "30sp"
 		text_size: self.size
@@ -201,7 +201,7 @@ WeatherFlowPyConsoleScreen:
 
 	## Indoor temperature minimum
 	Label:
-		text: "[color=00a4b4ff]" + app.Breathe['Min'] + " [size=15sp][sup]o[/sup]C[/color][/size]" 
+		text: "[color=00a4b4ff]" + app.Breathe['Min'] + " [size=15sp][sup]o[/sup]F[/color][/size]" 
 		font_name: "Fonts/SystemSanFranciscoDisplayThin.ttf"
 		font_size: "20sp"
 		text_size: self.size
@@ -215,7 +215,7 @@ WeatherFlowPyConsoleScreen:
 
 	## Indoor temperature maximum	
 	Label:
-		text: "[color=f05e40ff]" + app.Breathe['Max'] + " [size=15sp][sup]o[/sup]C[/color][/size]" 
+		text: "[color=f05e40ff]" + app.Breathe['Max'] + " [size=15sp][sup]o[/sup]F[/color][/size]" 
 		font_name: "Fonts/SystemSanFranciscoDisplayThin.ttf"
 		font_size: "20sp"
 		text_size: self.size
@@ -229,7 +229,7 @@ WeatherFlowPyConsoleScreen:
 		
 	## Outdoor temperature minimum	
 	Label:
-		text: "[color=00a4b4ff]" + app.Air['MinTemp'] + " [size=15sp][sup]o[/sup]C[/color][/size]" 
+		text: "[color=00a4b4ff]" + app.Air['MinTemp'] + " [size=15sp][sup]o[/sup]F[/color][/size]" 
 		font_name: "Fonts/SystemSanFranciscoDisplayThin.ttf"
 		font_size: "20sp"
 		text_size: self.size
@@ -255,7 +255,7 @@ WeatherFlowPyConsoleScreen:
 	
 	## Outdoor temperature Maximum	
 	Label:
-		text: "[color=f05e40ff]" + app.Air['MaxTemp'] + " [size=15sp][sup]o[/sup]C[/color][/size]" 
+		text: "[color=f05e40ff]" + app.Air['MaxTemp'] + " [size=15sp][sup]o[/sup]F[/color][/size]" 
 		font_name: "Fonts/SystemSanFranciscoDisplayThin.ttf"
 		font_size: "20sp"
 		text_size: self.size
@@ -284,7 +284,7 @@ WeatherFlowPyConsoleScreen:
 	## ----------------------------------------------------------
 	## 'FEELS LIKE' TEMPERATURE
 	Label:
-		text: app.Air['FeelsLike'] + " [sup]o[/sup]C" 
+		text: app.Air['FeelsLike'] + " [sup]o[/sup]F" 
 		font_name: "Fonts/SystemSanFranciscoDisplayThin.ttf"
 		font_size: "20sp"
 		text_size: self.size
@@ -312,7 +312,7 @@ WeatherFlowPyConsoleScreen:
 		
 	## DEW POINT
 	Label:
-		text: app.Air['DewPoint'] + " [sup]o[/sup]C"
+		text: app.Air['DewPoint'] + " [sup]o[/sup]F"
 		font_name: "Fonts/SystemSanFranciscoDisplayThin.ttf"
 		font_size: "20sp"
 		text_size: self.size
